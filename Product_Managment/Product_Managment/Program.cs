@@ -1,4 +1,5 @@
-﻿using System.Data.SqlClient;
+﻿using System.Data.Common;
+using System.Data.SqlClient;
 using Spectre.Console;
 
 namespace Product_Managment
@@ -19,7 +20,7 @@ namespace Product_Managment
 
             string name = AnsiConsole.Ask<string>("[yellow]Enter Name:[/]");
             string brand = AnsiConsole.Ask<string>("[yellow]Enter Brand:[/]");
-            decimal quantity = AnsiConsole.Ask<decimal>("[yellow]Enter Quantity:[/]");
+            byte quantity = AnsiConsole.Ask<byte>("[yellow]Enter Quantity:[/]");
             decimal price = AnsiConsole.Ask<decimal>("[yellow]Enter Price:[/]");
 
             cmd.Parameters.AddWithValue("@Name", name);
@@ -34,11 +35,9 @@ namespace Product_Managment
             con.Close();
         }
 
-        public void View_Product()
+        public static void Products(string query)
         {
             SqlConnection con = GetConnection();
-            string id = AnsiConsole.Ask<string>("[yellow]Enter Product ID you Want to get: [/]");
-            string query = $"select * from Product_Managment where ID = {id}";
             SqlCommand cmd = new SqlCommand(query, con);
             SqlDataReader reader = cmd.ExecuteReader();
 
@@ -64,36 +63,19 @@ namespace Product_Managment
             con.Close();
 
         }
+        public void View_Product_By_ID()
+        {
+            string id = AnsiConsole.Ask<string>("[yellow]Enter Product ID you Want to get: [/]");
+            string query = $"select * from Product_Managment where ID = {id}";
+            product_Managment.Products(query);
+            
+        }
         public void View_All_Products()
         {
-            SqlConnection con = GetConnection();
             string query = "select * from Product_Managment";
-            SqlCommand cmd = new SqlCommand(query, con);
-            SqlDataReader reader = cmd.ExecuteReader();
-
-            var table = new Table();
-            table.AddColumn("ID");
-            table.AddColumn("Name");
-            table.AddColumn("Brand");
-            table.AddColumn("Quantity");
-            table.AddColumn("Price");
-            table.Title("[underline rgb(131,111,255)]PRODUCTS DETAILS[/]");
-            table.BorderColor(Color.LightSlateGrey);
-            foreach (var column in table.Columns)
-            {
-                column.Centered();
-            }
-
-            while (reader.Read())
-            {
-                table.AddRow(reader["ID"].ToString(), reader["Name"].ToString(), reader["Brand"].ToString(), reader["Quantity"].ToString(), reader["Price"].ToString());
-            }
-
-            AnsiConsole.Write(table);
-
-            con.Close();
+            product_Managment.Products(query);
         }
-        public void update_Product()
+        public void update_Product_By_ID()
         {
             SqlConnection con = GetConnection();
             int id = AnsiConsole.Ask<int>("Enter the Product ID you want to update:");
@@ -116,7 +98,7 @@ namespace Product_Managment
             con.Close();
         }
 
-        public void Delete_Product()
+        public void Delete_Product_By_ID()
         {
             SqlConnection con = GetConnection();
             int id = AnsiConsole.Ask<int>("[yellow]Enter the product id you want to Delete:[/]");
@@ -154,7 +136,7 @@ namespace Product_Managment
                         }
                     case "View Product By ID":
                         {
-                            product.View_Product();
+                            product.View_Product_By_ID();
                             break;
                         }
                     case "View All Products":
@@ -164,12 +146,12 @@ namespace Product_Managment
                         }
                     case "Update Product By ID":
                         {
-                            product.update_Product();
+                            product.update_Product_By_ID();
                             break;
                         }
                     case "Delete Product By ID":
                         {
-                            product.Delete_Product();
+                            product.Delete_Product_By_ID();
                             break;
                         }
                 }
